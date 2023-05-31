@@ -1,0 +1,3 @@
+NumeroJogadores,3,6
+NumeroCartas,3,4
+NumeroCaracteres,10
