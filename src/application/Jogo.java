@@ -1,14 +1,14 @@
 package application;
 
-import entities.baralho.Baralho;
-import entities.baralho.Carta;
-import poo.trabalho5.entities.exceptions.InputDomainException;
-import poo.trabalho5.entities.exceptions.InternalException;
 import entities.jogo.Jogador;
 import entities.jogo.Partida;
+import entities.baralho.Baralho;
+import entities.baralho.Carta;
 import service.GerarMao;
 import service.GerarNomes;
 import service.ObterEntrada;
+import poo.trabalho5.entities.exceptions.InputDomainException;
+import poo.trabalho5.entities.exceptions.InternalException;
 
 import javax.swing.JOptionPane;
 import java.io.IOException;
@@ -103,28 +103,41 @@ public class Jogo {
                             numeroBaralho = random.nextInt(0, baralhos.size());
 
                             jogadores.add(new Jogador(nomes.get(i), GerarMao.gerar(baralhos.get(numeroBaralho),
-                                    numeroCartas - 1)));
+                                    numeroCartas, true)));
 
                             String mensagem = "Nome: " + jogadores.get(i).getNome() + " \nCartas: ";
 
-                            for (Carta temp : jogadores.get(i).getCartas()) {
-                                mensagem += temp.getNome() + " ";
+                            int j;
+
+                            for (j = 0; j < numeroCartas - 1; j++) {
+                                mensagem += jogadores.get(i).getCartas().get(j).getNome() + " ";
                             }
 
-                            mensagem += "?";
+                            Carta cartaOpcional = jogadores.get(i).getCartas().get(j);
+
+                            System.out.println(cartaOpcional.getNome());
 
                             JOptionPane.showMessageDialog(null, mensagem,
                                     "Jogador " + (i + 1) + " essa é a sua mão", JOptionPane.INFORMATION_MESSAGE);
 
                             if (ObterEntrada.obterRespostaBooleana()) {
-                                Carta novaCarta = GerarMao.gerar(baralhos.get(numeroBaralho),
-                                        1).get(0);
+                                switch (cartaOpcional.getPeso()) {
+                                    case 1 -> baralhos.get(numeroBaralho).getNaipeOuro().remove(cartaOpcional);
+                                    case 2 -> baralhos.get(numeroBaralho).getNaipeCopas().remove(cartaOpcional);
+                                    case 3 -> baralhos.get(numeroBaralho).getNaipePaus().remove(cartaOpcional);
+                                    case 4 -> baralhos.get(numeroBaralho).getNaipeEspadas().remove(cartaOpcional);
+                                }
+                            } else {
+                                jogadores.get(i).getCartas().remove(cartaOpcional);
 
-                                jogadores.get(i).getCartas().add(novaCarta);
+                                cartaOpcional = GerarMao.gerarNaipeEspecifico(baralhos.get(numeroBaralho),
+                                        1, cartaOpcional.getPeso()).get(0);
 
-                                JOptionPane.showMessageDialog(null, novaCarta.getNome(),
-                                        "Jogador " + (i + 1) + " essa é a sua última carta", JOptionPane.INFORMATION_MESSAGE);
+                                jogadores.get(i).getCartas().add(cartaOpcional);
                             }
+
+                            JOptionPane.showMessageDialog(null, cartaOpcional.getNome(),
+                                    "Jogador " + (i + 1) + " essa é a sua última carta", JOptionPane.INFORMATION_MESSAGE);
 
                             jogadores.get(i).setPontos(jogadores.get(i).gerarPontuacao());
                         }

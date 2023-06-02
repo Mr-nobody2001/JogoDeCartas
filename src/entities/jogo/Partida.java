@@ -45,7 +45,7 @@ public class Partida {
         do {
             for (Jogador temp : vencedores) {
                 Carta novaCarta = GerarMao.gerar(baralhos.get(numeroBaralho),
-                        1).get(0);
+                        1, false).get(0);
 
                 temp.getComplementos().add(novaCarta);
                 temp.setPontos(temp.gerarPontuacao());

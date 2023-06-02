@@ -11,7 +11,7 @@ import java.util.Random;
 public abstract class GerarMao {
     private static final Random random = new Random();
 
-    public static List<Carta> gerar(Baralho baralho, int numeroCartas) {
+    private static List<Carta> geraMao(Baralho baralho, int numeroCartas, int tipoNaipe, boolean cartaOpcional) {
         List<Carta> mao = new ArrayList<>(numeroCartas);
         List<Integer> naipes = new ArrayList<>(Arrays.asList(0, 1, 2, 3));
 
@@ -20,11 +20,15 @@ public abstract class GerarMao {
         naipe = 0;
 
         for (int j = 0; j < numeroCartas; j++) {
-            if (j % 2 == 0) {
-                numero = random.nextInt(0, naipes.size());
+            if (tipoNaipe == -1) {
+                if (j % 2 == 0) {
+                    numero = random.nextInt(0, naipes.size());
 
-                naipe = naipes.get(numero);
-                naipes.remove(numero);
+                    naipe = naipes.get(numero);
+                    naipes.remove(numero);
+                }
+            } else {
+                naipe = tipoNaipe - 1;
             }
 
             switch (naipe) {
@@ -32,6 +36,10 @@ public abstract class GerarMao {
                     index = random.nextInt(0, baralho.getNaipeOuro().size());
 
                     mao.add(baralho.getNaipeOuro().get(index));
+
+                    if (cartaOpcional && j > numeroCartas - 2) {
+                        break;
+                    }
 
                     baralho.getNaipeOuro().remove(index);
                 }
@@ -41,6 +49,10 @@ public abstract class GerarMao {
 
                     mao.add(baralho.getNaipeCopas().get(index));
 
+                    if (cartaOpcional && j > numeroCartas - 2) {
+                        break;
+                    }
+
                     baralho.getNaipeCopas().remove(index);
                 }
 
@@ -48,6 +60,10 @@ public abstract class GerarMao {
                     index = random.nextInt(0, baralho.getNaipePaus().size());
 
                     mao.add(baralho.getNaipePaus().get(index));
+
+                    if (cartaOpcional && j > numeroCartas - 2) {
+                        break;
+                    }
 
                     baralho.getNaipePaus().remove(index);
                 }
@@ -57,11 +73,23 @@ public abstract class GerarMao {
 
                     mao.add(baralho.getNaipeEspadas().get(index));
 
+                    if (cartaOpcional && j > numeroCartas - 2) {
+                        break;
+                    }
+
                     baralho.getNaipeEspadas().remove(index);
                 }
             }
         }
 
         return mao;
+    }
+
+    public static List<Carta> gerar(Baralho baralho, int numeroCartas, boolean cartaOpcional) {
+        return geraMao(baralho, numeroCartas, -1, cartaOpcional);
+    }
+
+    public static List<Carta> gerarNaipeEspecifico(Baralho baralho, int numeroCartas, int tipoNaipe) {
+        return geraMao(baralho, numeroCartas, tipoNaipe, false);
     }
 }
