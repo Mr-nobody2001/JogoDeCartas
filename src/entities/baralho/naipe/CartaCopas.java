@@ -1,9 +1,10 @@
 package entities.baralho.naipe;
 
 import entities.baralho.Carta;
+import entities.enums.Naipes;
 
 public class CartaCopas extends Carta {
     public CartaCopas(Integer valor, String nome) {
-        super(2, valor, nome);
+        super(Naipes.COPAS, valor, nome);
     }
 }

@@ -1,18 +1,20 @@
 package entities.baralho;
 
+import entities.enums.Naipes;
+
 public abstract class Carta {
-    private final Integer peso;
+    private final Naipes naipe;
     private final Integer valor;
     private final String nome;
 
-    public Carta(Integer peso, Integer valor, String nome) {
-        this.peso = peso;
+    public Carta(Naipes naipe, Integer valor, String nome) {
+        this.naipe = naipe;
         this.valor = valor;
         this.nome = nome;
     }
 
-    public Integer getPeso() {
-        return peso;
+    public Naipes getNaipe() {
+        return naipe;
     }
 
     public Integer getValor() {

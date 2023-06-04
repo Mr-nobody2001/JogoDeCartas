@@ -1,6 +1,6 @@
 package service;
 
-import poo.trabalho5.entities.exceptions.InputDomainException;
+import entities.exceptions.InputDomainException;
 
 import javax.swing.JOptionPane;
 import java.util.ArrayList;

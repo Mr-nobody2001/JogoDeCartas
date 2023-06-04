@@ -21,7 +21,7 @@ public class Jogador {
         double soma = 0;
 
         for (Carta temp : this.cartas) {
-            soma += temp.getPeso() * temp.getValor();
+            soma += temp.getNaipe().getValue() * temp.getValor();
         }
 
         for (Carta temp : this.complementos) {

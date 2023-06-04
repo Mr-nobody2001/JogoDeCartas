@@ -1,4 +1,4 @@
-package poo.trabalho5.entities.exceptions;
+package entities.exceptions;
 
 public class InternalException extends RuntimeException{
     public InternalException(String msg) {

@@ -1,4 +1,4 @@
-package poo.trabalho5.entities.exceptions;
+package entities.exceptions;
 
 public class InputDomainException extends RuntimeException {
     public InputDomainException(String msg) {

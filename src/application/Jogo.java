@@ -7,8 +7,8 @@ import entities.baralho.Carta;
 import service.GerarMao;
 import service.GerarNomes;
 import service.ObterEntrada;
-import poo.trabalho5.entities.exceptions.InputDomainException;
-import poo.trabalho5.entities.exceptions.InternalException;
+import entities.exceptions.InputDomainException;
+import entities.exceptions.InternalException;
 
 import javax.swing.JOptionPane;
 import java.io.IOException;
@@ -121,7 +121,7 @@ public class Jogo {
                                     "Jogador " + (i + 1) + " essa é a sua mão", JOptionPane.INFORMATION_MESSAGE);
 
                             if (ObterEntrada.obterRespostaBooleana()) {
-                                switch (cartaOpcional.getPeso()) {
+                                switch (cartaOpcional.getNaipe().getValue()) {
                                     case 1 -> baralhos.get(numeroBaralho).getNaipeOuro().remove(cartaOpcional);
                                     case 2 -> baralhos.get(numeroBaralho).getNaipeCopas().remove(cartaOpcional);
                                     case 3 -> baralhos.get(numeroBaralho).getNaipePaus().remove(cartaOpcional);
@@ -131,7 +131,7 @@ public class Jogo {
                                 jogadores.get(i).getCartas().remove(cartaOpcional);
 
                                 cartaOpcional = GerarMao.gerarNaipeEspecifico(baralhos.get(numeroBaralho),
-                                        1, cartaOpcional.getPeso()).get(0);
+                                        1, cartaOpcional.getNaipe().getValue()).get(0);
 
                                 jogadores.get(i).getCartas().add(cartaOpcional);
                             }

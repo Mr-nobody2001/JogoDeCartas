@@ -2,7 +2,7 @@ package entities.jogo;
 
 import entities.baralho.Baralho;
 import entities.baralho.Carta;
-import poo.trabalho5.entities.exceptions.InternalException;
+import entities.exceptions.InternalException;
 import service.GerarMao;
 
 import java.util.ArrayList;
