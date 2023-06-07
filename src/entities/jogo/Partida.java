@@ -10,11 +10,11 @@ import java.util.List;
 import java.util.Random;
 
 public class Partida {
-    private final List<Jogador> participantes;
-    private Jogador vencedor;
+    private final List<Jogador> jogadores = new ArrayList<>();
+    private final List<List<Carta>> maoJogador = new ArrayList<>();
+    private final List<List<Carta>> complementosJogador = new ArrayList<>();
 
-    public Partida(List<Jogador> participantes) {
-        this.participantes = participantes;
+    public Partida() {
     }
 
     public List<Jogador> obterVencedor() {
@@ -22,14 +22,14 @@ public class Partida {
 
         Double maiorPontuacao = -1.0;
 
-        for (Jogador temp : this.participantes) {
-            if (maiorPontuacao.compareTo(temp.getPontos()) < 0) {
-                maiorPontuacao = temp.getPontos();
+        for (Jogador temp : this.jogadores) {
+            if (maiorPontuacao.compareTo(gerarPontuacao(temp.getNome())) < 0) {
+                maiorPontuacao = gerarPontuacao(temp.getNome());
             }
         }
 
-        for (Jogador temp : this.participantes) {
-            if (maiorPontuacao.equals(temp.getPontos())) {
+        for (Jogador temp : this.jogadores) {
+            if (maiorPontuacao.equals(gerarPontuacao(temp.getNome()))) {
                 vencedores.add(temp);
             }
         }
@@ -43,12 +43,15 @@ public class Partida {
         int numeroBaralho = random.nextInt(0, baralhos.size());
 
         do {
-            for (Jogador temp : vencedores) {
+            for (Jogador vencedor : vencedores) {
                 Carta novaCarta = GerarMao.gerar(baralhos.get(numeroBaralho),
                         1, false).get(0);
 
-                temp.getComplementos().add(novaCarta);
-                temp.setPontos(temp.gerarPontuacao());
+                for (int j = 0; j < this.getJogadores().size(); j++) {
+                    if (this.getJogadores().get(j).getNome().equals(vencedor.getNome())) {
+                        this.getComplementosJogador().get(j).add(novaCarta);
+                    }
+                }
             }
 
             vencedores = this.obterVencedor();
@@ -57,16 +60,30 @@ public class Partida {
         return vencedores.get(0);
     }
 
-    public List<Jogador> getParticipantes() {
-        return participantes;
+    public Double gerarPontuacao(int i) {
+        double soma = 0;
+
+        for (Carta temp : this.getMaoJogador().get(i)) {
+            soma += temp.getNaipe().getValue() * temp.getValor();
+        }
+
+        for (Carta temp : this.getComplementosJogador().get(i)) {
+            soma += (temp.getNaipe().getValue() * temp.getValor()) / 10.0;
+        }
+
+        return soma;
     }
 
-    public Jogador getVencedor() {
-        return vencedor;
-    }
+    public Double gerarPontuacao(String nome) {
+        int i;
 
-    public void setVencedor(Jogador vencedor) {
-        this.vencedor = vencedor;
+        for (i = 0; i < this.getJogadores().size(); i++) {
+            if (this.getJogadores().get(i).getNome().equals(nome)) {
+                break;
+            }
+        }
+
+        return gerarPontuacao(i);
     }
 
     public String resumirPartida(int numeroCartas) {
@@ -80,22 +97,22 @@ public class Partida {
 
         mensagem.append("Complementos Pontos\n");
 
-        for (Jogador temp : this.participantes) {
-            mensagem.append(String.format("%-30s", temp.getNome()));
+        for (int i = 0; i < this.getJogadores().size(); i++) {
+            mensagem.append(String.format("%-30s", this.getJogadores().get(i).getNome()));
 
-            for (Carta temp2 : temp.getCartas()) {
+            for (Carta temp2 : this.getMaoJogador().get(i)) {
                 mensagem.append(String.format("%-8s", temp2.getNome()));
             }
 
-            if (temp.getComplementos().size() != 0) {
-                for (Carta temp2 : temp.getComplementos()) {
+            if (this.getComplementosJogador().get(i).size() != 0) {
+                for (Carta temp2 : this.getComplementosJogador().get(i)) {
                     mensagem.append(String.format("%-14s", temp2.getNome())).append(" ,");
                 }
             } else {
                 mensagem.append(String.format("%-14s", "............"));
             }
 
-            mensagem.append(String.format("%.2f", temp.getPontos())).append("\n");
+            mensagem.append(String.format("%.2f", gerarPontuacao(i))).append("\n");
         }
 
         return mensagem.toString();
@@ -103,43 +120,54 @@ public class Partida {
 
     public String resumirPartidaJogador(String nomeJogador) {
         StringBuilder mensagem = new StringBuilder();
-        Jogador jogador = null;
+        int i;
 
-        for (Jogador temp : this.participantes) {
-            if (temp.getNome().equalsIgnoreCase(nomeJogador)) {
-                jogador = temp;
+        for (i = 0; i < this.getJogadores().size(); i++) {
+            if (this.getJogadores().get(i).getNome().equalsIgnoreCase(nomeJogador)) {
                 break;
             }
         }
 
-        if (jogador == null) {
+        if (i == this.getJogadores().size()) {
             throw new InternalException("Erro: Jogador não encontrado");
         }
 
         mensagem.append(String.format("%-30s", "Jogador"));
 
-        for (int j = 0; j < jogador.getCartas().size(); j++) {
+        for (int j = 0; j < this.getMaoJogador().get(i).size(); j++) {
             mensagem.append(" Carta").append(j + 1).append(" ");
         }
 
         mensagem.append("Complementos Pontos\n");
 
-        mensagem.append(String.format("%-30s", jogador.getNome()));
+        mensagem.append(String.format("%-30s", this.getJogadores().get(i).getNome()));
 
-        for (Carta temp : jogador.getCartas()) {
+        for (Carta temp : this.getMaoJogador().get(i)) {
             mensagem.append(String.format("%-8s", temp.getNome()));
         }
 
-        if (jogador.getComplementos().size() != 0) {
-            for (Carta temp2 : jogador.getComplementos()) {
+        if (this.getComplementosJogador().get(i).size() != 0) {
+            for (Carta temp2 : this.getComplementosJogador().get(i)) {
                 mensagem.append(String.format("%-14s", temp2.getNome())).append(" ,");
             }
         } else {
             mensagem.append(String.format("%-14s", "............"));
         }
 
-        mensagem.append(String.format("%.2f", jogador.getPontos())).append("\n");
+        mensagem.append(String.format("%.2f", gerarPontuacao(i))).append("\n");
 
         return mensagem.toString();
+    }
+
+    public List<Jogador> getJogadores() {
+        return jogadores;
+    }
+
+    public List<List<Carta>> getMaoJogador() {
+        return maoJogador;
+    }
+
+    public List<List<Carta>> getComplementosJogador() {
+        return complementosJogador;
     }
 }

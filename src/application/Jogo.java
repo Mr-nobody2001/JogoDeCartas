@@ -15,42 +15,18 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.io.BufferedReader;
-import java.io.FileReader;
+import java.util.Properties;
+import java.io.FileInputStream;
 
 public class Jogo {
     public static void main(String[] args) {
-        int numeroJogadoresMin, numeroJogadoresMax, numeroCartasMin, numeroCartasMax, numeroCaracteresMax;
-
-        numeroJogadoresMin = numeroJogadoresMax = numeroCartasMin = numeroCartasMax = numeroCaracteresMax = 0;
+        Properties properties = new Properties();
 
         String path = "C:\\Users\\gabri\\OneDrive\\Documentos\\Conteúdo Faculdade\\Segundo Semestre\\Técnicas de programação" +
                 "\\trabalhos\\trabalho5\\src\\files\\configuracao.txt";
 
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(path))) {
-            String line = bufferedReader.readLine();
-
-            String[] dadosBruto;
-
-            while (line != null) {
-                dadosBruto = line.split(",");
-
-                if (dadosBruto[0].equalsIgnoreCase("NumeroJogadores")) {
-                    numeroJogadoresMin = Integer.parseInt(dadosBruto[1]);
-                    numeroJogadoresMax = Integer.parseInt(dadosBruto[2]);
-                } else {
-                    if (dadosBruto[0].equalsIgnoreCase("NumeroCartas")) {
-                        numeroCartasMin = Integer.parseInt(dadosBruto[1]);
-                        numeroCartasMax = Integer.parseInt(dadosBruto[2]);
-                    } else {
-                        if (dadosBruto[0].equalsIgnoreCase("NumeroCaracteres")) {
-                            numeroCaracteresMax = Integer.parseInt(dadosBruto[1]);
-                        }
-                    }
-                }
-
-                line = bufferedReader.readLine();
-            }
+        try (FileInputStream fileInputStream = new FileInputStream(path)) {
+            properties.load(fileInputStream);
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (NumberFormatException e) {
@@ -80,14 +56,16 @@ public class Jogo {
 
                         int numeroJogadores, numeroCartas;
 
-                        numeroJogadores = ObterEntrada.obterNumeroJogadores(numeroJogadoresMin, numeroJogadoresMax);
-                        numeroCartas = ObterEntrada.obterNumeroCartas(numeroCartasMin, numeroCartasMax);
+                        numeroJogadores = ObterEntrada.obterNumeroJogadores(Integer.parseInt(properties.getProperty("numeroMinJogadores")),
+                                Integer.parseInt(properties.getProperty("numeroMaxJogadores")));
+                        numeroCartas = ObterEntrada.obterNumeroCartas(Integer.parseInt(properties.getProperty("numeroMinCartas")),
+                                Integer.parseInt(properties.getProperty("numeroMaxCartas")));
 
                         List<String> nomes;
 
                         int numeroCaracteres;
 
-                        numeroCaracteres = ObterEntrada.obterNumeroCaracteres(numeroCaracteresMax);
+                        numeroCaracteres = ObterEntrada.obterNumeroCaracteres(Integer.parseInt(properties.getProperty("numeroCaracteres")));
 
                         if (opcao == 1) {
                             nomes = GerarNomes.gerar(numeroJogadores, numeroCaracteres);
@@ -95,27 +73,29 @@ public class Jogo {
                             nomes = ObterEntrada.obterNomeJogador(numeroJogadores, numeroCaracteres);
                         }
 
-                        List<Jogador> jogadores = new ArrayList<>(numeroJogadores);
+                        Partida partida = new Partida();
 
                         int numeroBaralho;
 
                         for (int i = 0; i < numeroJogadores; i++) {
                             numeroBaralho = random.nextInt(0, baralhos.size());
 
-                            jogadores.add(new Jogador(nomes.get(i), GerarMao.gerar(baralhos.get(numeroBaralho),
-                                    numeroCartas, true)));
+                            partida.getJogadores().add(new Jogador(nomes.get(i)));
 
-                            String mensagem = "Nome: " + jogadores.get(i).getNome() + " \nCartas: ";
+                            partida.getMaoJogador().add(GerarMao.gerar(baralhos.get(numeroBaralho),
+                                    numeroCartas, true));
+
+                            partida.getComplementosJogador().add(new ArrayList<>());
+
+                            String mensagem = "Nome: " + partida.getJogadores().get(i).getNome() + " \nCartas: ";
 
                             int j;
 
                             for (j = 0; j < numeroCartas - 1; j++) {
-                                mensagem += jogadores.get(i).getCartas().get(j).getNome() + " ";
+                                mensagem += partida.getMaoJogador().get(i).get(j).getNome() + " ";
                             }
 
-                            Carta cartaOpcional = jogadores.get(i).getCartas().get(j);
-
-                            System.out.println(cartaOpcional.getNome());
+                            Carta cartaOpcional = partida.getMaoJogador().get(i).get(j);
 
                             JOptionPane.showMessageDialog(null, mensagem,
                                     "Jogador " + (i + 1) + " essa é a sua mão", JOptionPane.INFORMATION_MESSAGE);
@@ -128,26 +108,24 @@ public class Jogo {
                                     case 4 -> baralhos.get(numeroBaralho).getNaipeEspadas().remove(cartaOpcional);
                                 }
                             } else {
-                                jogadores.get(i).getCartas().remove(cartaOpcional);
+                                partida.getMaoJogador().get(i).remove(cartaOpcional);
 
                                 cartaOpcional = GerarMao.gerarNaipeEspecifico(baralhos.get(numeroBaralho),
                                         1, cartaOpcional.getNaipe().getValue()).get(0);
 
-                                jogadores.get(i).getCartas().add(cartaOpcional);
+                                partida.getMaoJogador().get(i).add(cartaOpcional);
                             }
 
                             JOptionPane.showMessageDialog(null, cartaOpcional.getNome(),
                                     "Jogador " + (i + 1) + " essa é a sua última carta", JOptionPane.INFORMATION_MESSAGE);
 
-                            jogadores.get(i).setPontos(jogadores.get(i).gerarPontuacao());
                         }
-
-                        Partida partida = new Partida(jogadores);
 
                         String mensagem = "";
 
-                        for (Jogador temp : jogadores) {
-                            mensagem += "Nome: " + temp.getNome() + " \n" + "Pontuação: " + temp.getPontos() + "\n";
+                        for (Jogador temp : partida.getJogadores()) {
+                            mensagem += "Nome: " + temp.getNome() +
+                                    " \n" + "Pontuação: " + partida.gerarPontuacao(temp.getNome()) + "\n";
                         }
 
                         JOptionPane.showMessageDialog(null, mensagem,
@@ -160,10 +138,8 @@ public class Jogo {
                         }
 
                         JOptionPane.showMessageDialog(null, "Nome: " + vencedores.get(0).getNome()
-                                        + "\nPontuação: " + vencedores.get(0).getPontos(),
+                                        + "\nPontuação: " + partida.gerarPontuacao(vencedores.get(0).getNome()),
                                 "Vencedor", JOptionPane.INFORMATION_MESSAGE);
-
-                        partida.setVencedor(vencedores.get(0));
 
                         ultimaPartida = partida;
 
@@ -177,7 +153,7 @@ public class Jogo {
                             throw new InternalException("Erro: Não há partidas registradas no histórico");
                         }
 
-                        JOptionPane.showMessageDialog(null, ultimaPartida.resumirPartida(numeroCartasMax),
+                        JOptionPane.showMessageDialog(null, ultimaPartida.resumirPartida(Integer.parseInt(properties.getProperty("numeroMaxCartas"))),
                                 "Resumo da última partida", JOptionPane.INFORMATION_MESSAGE);
                     }
 
@@ -188,7 +164,7 @@ public class Jogo {
                             throw new InternalException("Erro: Não há partidas registradas no histórico");
                         }
 
-                        String nomeJogador = ObterEntrada.obterNomeJogador(numeroCaracteresMax);
+                        String nomeJogador = ObterEntrada.obterNomeJogador(Integer.parseInt(properties.getProperty("numeroCaracteres")));
 
                         JOptionPane.showMessageDialog(null, ultimaPartida.resumirPartidaJogador(nomeJogador),
                                 "Resumo da última partida", JOptionPane.INFORMATION_MESSAGE);

@@ -1,3 +1,5 @@
-NumeroJogadores,3,6
-NumeroCartas,3,4
-NumeroCaracteres,10
+numeroMinJogadores=3
+numeroMaxJogadores=6
+numeroMinCartas=3
+numeroMaxCartas=4
+numeroCaracteres=10
